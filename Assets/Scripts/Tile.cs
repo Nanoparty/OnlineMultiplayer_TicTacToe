@@ -6,11 +6,13 @@ public class Tile : MonoBehaviour
 {
     public bool clicked;
     public bool spawned;
+    public ulong clientId;
 
     public void OnMouseOver()
     {
         if (Input.GetKey(KeyCode.Mouse0)){
             clicked = true;
+            clientId = (ulong)int.Parse(GameManager.Singleton.playerTurn.Value.ToString());
         }
     }
 }
