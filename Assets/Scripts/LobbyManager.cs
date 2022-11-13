@@ -62,14 +62,14 @@ public class LobbyManager : NetworkBehaviour
                 ? Data.playerNames[clientLobbyStatus.Key]
                 : $"Player_{clientLobbyStatus.Key}";
 
-            UserLobbyStatusText += "PLAYER:" + playerName + "            ";
+            UserLobbyStatusText += "Player:" + playerName + "            ";
             if (clientLobbyStatus.Value)
             {
-                UserLobbyStatusText += "(READY)\n";
+                UserLobbyStatusText += "(Ready)\n";
             }
             else
             {
-                UserLobbyStatusText += "(NOT READY)\n";
+                UserLobbyStatusText += "(Not Ready)\n";
             }
         }
     }
@@ -208,5 +208,11 @@ public class LobbyManager : NetworkBehaviour
             Data.AddPlayerName(clientId, name);
             GenerateUserStatsForLobby();
         }
+    }
+
+    public void ExitGame()
+    {
+        NetworkManager.Singleton.Shutdown();
+        SceneTransitionHandler.sceneTransitionHandler.ExitAnsLoadStartMenu();
     }
 }

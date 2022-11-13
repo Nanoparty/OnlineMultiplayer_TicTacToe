@@ -14,4 +14,7 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Scenes/Lobby.unity
     guid: aa3618febfc914cf799e02d6c8c69725
+  - enabled: 1
+    path: Assets/Scenes/LocalMatch.unity
+    guid: 7b9e4212b409a46498af8a7bbdf2e7fc
   m_configObjects: {}

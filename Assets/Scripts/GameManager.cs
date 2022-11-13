@@ -24,6 +24,7 @@ public class GameManager : NetworkBehaviour
     public TMP_Text player1Score;
     public TMP_Text player2Score;
     public TMP_Text count;
+    public TMP_Text winnerText;
 
     private bool m_ClientGameOver;
     private bool m_ClientGameStarted;
@@ -33,6 +34,7 @@ public class GameManager : NetworkBehaviour
     public NetworkVariable<bool> isGameOver { get; } = new NetworkVariable<bool>(false);
     public NetworkVariable<int> counter { get; } = new NetworkVariable<int>(0);
     public NetworkVariable<FixedString32Bytes> playerTurn { get; } = new NetworkVariable<FixedString32Bytes>("0");
+    public NetworkVariable<FixedString32Bytes> winner { get; } = new NetworkVariable<FixedString32Bytes>("0");
 
 
     public static GameManager Singleton { get; private set; }
@@ -47,40 +49,28 @@ public class GameManager : NetworkBehaviour
         if (IsServer)
         {
             hasGameStarted.Value = false;
-            
-            //playerTurn.Value = Data.playerNames[0];
-
-            ////Set our time remaining locally
-            //m_TimeRemaining = m_DelayedStartTime;
-
-            ////Set for server side
-            //m_ReplicatedTimeSent = false;
+            isGameOver.Value = false;
         }
         else
         {
-            //We do a check for the client side value upon instantiating the class (should be zero)
-            //Debug.LogFormat("Client side we started with a timer value of {0}", m_TimeRemaining);
+
         }
 
         player1Text.SetText(Data.playerNames[0]);
         player2Text.SetText(Data.playerNames[1]);
+        winnerText.gameObject.SetActive(false);
     }
 
     internal static event Action OnSingletonReady;
 
     private void Update()
     {
-        //Is the game over?
         if (IsCurrentGameOver()) return;
 
-        //Update game timer (if the game hasn't started)
-        //UpdateGameTimer();
+        if (!hasGameStarted.Value) hasGameStarted.Value = true;
 
-        //If we are a connected client, then don't update the enemies (server side only)
         if (!IsServer) return;
 
-        //If we are the server and the game has started, then update the enemies
-        //if (HasGameStarted()) UpdateEnemies();
     }
 
     public override void OnNetworkDespawn()
@@ -88,8 +78,7 @@ public class GameManager : NetworkBehaviour
         base.OnNetworkDespawn();
         if (IsServer)
         {
-            //m_Enemies.Clear();
-            //m_Shields.Clear();
+
         }
 
         NetworkManager.Singleton.OnClientConnectedCallback -= OnClientConnected;
@@ -102,16 +91,9 @@ public class GameManager : NetworkBehaviour
             m_ClientGameOver = false;
             m_ClientGameStarted = false;
 
-            //m_CountdownStarted.OnValueChanged += (oldValue, newValue) =>
-            //{
-            //    m_ClientStartCountdown = newValue;
-            //    Debug.LogFormat("Client side we were notified the start count down state was {0}", newValue);
-            //};
-
             hasGameStarted.OnValueChanged += (oldValue, newValue) =>
             {
                 m_ClientGameStarted = newValue;
-                //gameTimerText.gameObject.SetActive(!m_ClientGameStarted);
                 Debug.LogFormat("Client side we were notified the game started state was {0}", newValue);
             };
 
@@ -122,8 +104,6 @@ public class GameManager : NetworkBehaviour
             };
         }
 
-        //Both client and host/server will set the scene state to "ingame" which places the PlayerControl into the SceneTransitionHandler.SceneStates.INGAME
-        //and in turn makes the players visible and allows for the players to be controlled.
         SceneTransitionHandler.sceneTransitionHandler.SetSceneState(SceneTransitionHandler.SceneStates.Ingame);
 
         if (IsServer)
@@ -136,11 +116,6 @@ public class GameManager : NetworkBehaviour
 
     private void OnClientConnected(ulong clientId)
     {
-        //if (m_ReplicatedTimeSent)
-        //{
-        //    // Send the RPC only to the newly connected client
-        //    SetReplicatedTimeRemainingClientRPC(m_TimeRemaining, new ClientRpcParams { Send = new ClientRpcSendParams { TargetClientIds = new List<ulong>() { clientId } } });
-        //}
         if (NetworkManager.Singleton.ConnectedClientsList.Count == 2)
         {
             hasGameStarted.Value = true;
@@ -163,32 +138,11 @@ public class GameManager : NetworkBehaviour
 
     private void OnGameStarted()
     {
-        //gameTimerText.gameObject.SetActive(false);
-        //CreateEnemies();
-        //CreateShields();
-        //CreateSuperEnemy();
-    }
-
-    public void SetActivePlayer(int player)
-    {
-        currentPlayerText.SetText("Current Player: {0}", player);
-    }
-
-    public void AddCount()
-    {
-        counter.Value++;
-        count.SetText(counter.Value.ToString());
-    }
-
-    public void SetCount(int c)
-    {
-        counter.Value = c;
-        count.SetText(counter.Value.ToString());
+        
     }
 
     public void SetCurrentPlayerText(string s)
     {
-        //playerTurn.Value = s;
         currentPlayerText.SetText(s);
     }
 
@@ -202,12 +156,69 @@ public class GameManager : NetworkBehaviour
         Debug.Log($"Swap attempt client:{clientId} playerTurn:{playerTurn.Value.ToString()}");
         if (playerTurn.Value.ToString() != clientId.ToString()) return;
 
+        //Check for Victory before switching
+        CheckVictory();
+        if (isGameOver.Value) return;
+
         Debug.Log($"Player {clientId} has completed their turn");
         ulong currentPlayer  = NetworkManager.Singleton.ConnectedClientsIds.Where(id => id != clientId).First();
         playerTurn.Value = currentPlayer.ToString();
         Debug.Log($"Player {currentPlayer} is starting their turn");
         
         SetCurrentPlayerText(Data.playerNames[currentPlayer]);
+    }
+
+    private void CheckVictory()
+    {
+        Debug.Log("Check Victory");
+        int TL = squares[0].GetComponent<Tile>().player;
+        int TM = squares[1].GetComponent<Tile>().player;
+        int TR = squares[2].GetComponent<Tile>().player;
+
+        int ML = squares[3].GetComponent<Tile>().player;
+        int MM = squares[4].GetComponent<Tile>().player;
+        int MR = squares[5].GetComponent<Tile>().player;
+
+        int BL = squares[6].GetComponent<Tile>().player;
+        int BM = squares[7].GetComponent<Tile>().player;
+        int BR = squares[8].GetComponent<Tile>().player;
+
+        if (TL == TM && TM == TR && TL != -1) SetVictory();
+        if (ML == MM && MM == MR && MR != -1) SetVictory();
+        if (BL == BM && BM == BR && BR != -1) SetVictory();
+
+        if (TL == ML && ML == BL && BL != -1) SetVictory();
+        if (TM == MM && MM == BM && BM != -1) SetVictory();
+        if (TR == MR && MR == BR && BR != -1) SetVictory();
+
+        if (TL == MM && MM == BR && BR != -1) SetVictory();
+        if (TR == MM && MM == BL && BL != -1) SetVictory();
+
+        Debug.Log($"{TL} - {TM} - {TR} - {ML} - {MM} - {MR} - {BL} - {BM} - {BR}");
+    }
+
+    public void SetVictory()
+    {
+        Debug.Log("Set Victory");
+        
+        isGameOver.Value = true;
+        
+        if (playerTurn.Value == "0")
+        {
+            winner.Value = Data.playerNames[0];
+        }
+        else
+        {
+            winner.Value = Data.playerNames[1];
+        }
+
+        SetVictoryText(winner.Value.ToString());
+    }
+
+    public void SetVictoryText(string winner)
+    {
+        winnerText.text = $"{winner} won!";
+        winnerText.gameObject.SetActive(true);
     }
 
     public void ExitGame()
