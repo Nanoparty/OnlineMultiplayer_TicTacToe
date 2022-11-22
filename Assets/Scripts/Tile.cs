@@ -18,7 +18,13 @@ public class Tile : MonoBehaviour
     {
         if (Input.GetKey(KeyCode.Mouse0)){
             clicked = true;
-            //clientId = (ulong)int.Parse(GameManager.Singleton.playerTurn.Value.ToString());
         }
+    }
+
+    public void Reset()
+    {
+        clicked = false;
+        spawned = false;
+        player = -1;
     }
 }
