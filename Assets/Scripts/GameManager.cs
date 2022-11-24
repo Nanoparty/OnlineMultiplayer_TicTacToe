@@ -38,7 +38,7 @@ public class GameManager : NetworkBehaviour
     private bool m_ClientGameOver;
     private bool m_ClientGameStarted;
 
-    private List<GameObject> pieces;
+    public List<GameObject> pieces;
 
 
     public NetworkVariable<bool> hasGameStarted { get; } = new NetworkVariable<bool>(false);
@@ -81,6 +81,7 @@ public class GameManager : NetworkBehaviour
         player2Check.enabled = false;
         player1Wins.SetActive(false);
         player2Wins.SetActive(false);
+        pieces = new List<GameObject>();
     }
 
     internal static event Action OnSingletonReady;
@@ -262,18 +263,48 @@ public class GameManager : NetworkBehaviour
         }
     }
 
+    //private void RetryListener()
+    //{
+    //    if (NetworkManager.Singleton.LocalClientId == 0)
+    //    {
+    //        player1Check.enabled = true;
+    //        player1Retry.Value = true;
+    //    }
+    //    else
+    //    {
+    //        player2Check.enabled = true;
+    //        player2Retry.Value = true;
+    //    }
+    //    CheckRematch();
+    //}
+
+    
     private void RetryListener()
     {
         if (NetworkManager.Singleton.LocalClientId == 0)
         {
-            player1Check.enabled = true;
-            player1Retry.Value = true;
+            SetPlayer1CheckServerRpc();
         }
         else
         {
-            player2Check.enabled = true;
-            player2Retry.Value = true;
+            SetPlayer2CheckServerRpc();
         }
+        
+    }
+
+    [ServerRpc(RequireOwnership = false)]
+    private void SetPlayer1CheckServerRpc()
+    {
+        player1Check.enabled = true;
+        player1Retry.Value = true;
+        CheckRematch();
+    }
+
+    [ServerRpc(RequireOwnership = false)]
+    private void SetPlayer2CheckServerRpc()
+    {
+        player2Check.enabled = true;
+        player2Retry.Value = true;
         CheckRematch();
     }
 

@@ -7747,6 +7747,14 @@ PrefabInstance:
       propertyPath: NetworkConfig.NetworkPrefabs.Array.data[3].Prefab
       value: 
       objectReference: {fileID: 6207891771778616883, guid: a1b4f6e6adda24ee9bf4073eee0d8273, type: 3}
+    - target: {fileID: 5804297909093967476, guid: 74f78af0dede0400b96845bbdbf84955, type: 3}
+      propertyPath: ConnectionData.Address
+      value: 127.0.0.1
+      objectReference: {fileID: 0}
+    - target: {fileID: 5804297909093967476, guid: 74f78af0dede0400b96845bbdbf84955, type: 3}
+      propertyPath: ConnectionData.ServerListenAddress
+      value: 0.0.0.0
+      objectReference: {fileID: 0}
     - target: {fileID: 5804297909093967477, guid: 74f78af0dede0400b96845bbdbf84955, type: 3}
       propertyPath: m_Name
       value: NetworkManager

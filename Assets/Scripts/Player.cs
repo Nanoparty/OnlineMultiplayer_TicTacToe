@@ -191,6 +191,7 @@ public class Player : NetworkBehaviour
         shape.GetComponent<NetworkObject>().Spawn();
         GameManager.Singleton.squares[pos].GetComponent<Tile>().player = (int)currentPlayer;
         MarkSquareClientRpc(pos);
+        GameManager.Singleton.pieces.Add(shape);
     }
 
     [ServerRpc]
@@ -201,12 +202,13 @@ public class Player : NetworkBehaviour
         shape.GetComponent<NetworkObject>().Spawn();
         GameManager.Singleton.squares[pos].GetComponent<Tile>().player = (int)currentPlayer;
         MarkSquareClientRpc(pos);
+        GameManager.Singleton.pieces.Add(shape);
     }
 
     [ClientRpc]
     private void MarkSquareClientRpc(int pos)
     {
         GameManager.Singleton.squares[pos].GetComponent<Tile>().spawned = true;
-        GameManager.Singleton.squares[pos].GetComponent<Tile>().player = (int)currentPlayer;
+        GameManager.Singleton.squares[pos].GetComponent<Tile>().player = int.Parse(GameManager.Singleton.playerTurn.Value.ToString());
     }
 }
