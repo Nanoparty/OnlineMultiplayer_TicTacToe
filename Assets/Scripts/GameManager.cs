@@ -318,6 +318,9 @@ public class GameManager : NetworkBehaviour
 
     public void ResetMatch()
     {
+        player1Wins.SetActive(false);
+        player2Wins.SetActive(false);
+
         foreach(var s in squares)
         {
             s.GetComponent<Tile>().Reset();
@@ -332,10 +335,23 @@ public class GameManager : NetworkBehaviour
         player2Check.enabled = false;
 
         ulong currentPlayer = 0;
-        playerTurn.Value = currentPlayer.ToString();
+        //playerTurn.Value = currentPlayer.ToString();
 
         SetCurrentPlayerText(Data.playerNames[currentPlayer]);
         currentPlayerImage.color = Color.red;
+
+        ResetServerRpc();
+    }
+
+    [ServerRpc(RequireOwnership = false)]
+    private void ResetServerRpc()
+    {
+        isGameOver.Value = false;
+        newGame.Value = false;
+        player2Retry.Value = false;
+        player2Retry.Value = false;
+        playerTurn.Value = "0";
+        hasGameStarted.Value = true;
     }
 
     public void UpdatePlayer1Retry(bool b)
