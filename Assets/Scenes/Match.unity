@@ -6287,6 +6287,38 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 1121433567}
     - target: {fileID: 4475104351571827457, guid: 09cca5a9f0bb94210b0bceca65582b08, type: 3}
+      propertyPath: PLAYER1COLOR.a
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4475104351571827457, guid: 09cca5a9f0bb94210b0bceca65582b08, type: 3}
+      propertyPath: PLAYER1COLOR.b
+      value: 0.41960785
+      objectReference: {fileID: 0}
+    - target: {fileID: 4475104351571827457, guid: 09cca5a9f0bb94210b0bceca65582b08, type: 3}
+      propertyPath: PLAYER1COLOR.g
+      value: 0.41960785
+      objectReference: {fileID: 0}
+    - target: {fileID: 4475104351571827457, guid: 09cca5a9f0bb94210b0bceca65582b08, type: 3}
+      propertyPath: PLAYER1COLOR.r
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4475104351571827457, guid: 09cca5a9f0bb94210b0bceca65582b08, type: 3}
+      propertyPath: PLAYER2COLOR.a
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4475104351571827457, guid: 09cca5a9f0bb94210b0bceca65582b08, type: 3}
+      propertyPath: PLAYER2COLOR.b
+      value: 0.9843138
+      objectReference: {fileID: 0}
+    - target: {fileID: 4475104351571827457, guid: 09cca5a9f0bb94210b0bceca65582b08, type: 3}
+      propertyPath: PLAYER2COLOR.g
+      value: 0.7686275
+      objectReference: {fileID: 0}
+    - target: {fileID: 4475104351571827457, guid: 09cca5a9f0bb94210b0bceca65582b08, type: 3}
+      propertyPath: PLAYER2COLOR.r
+      value: 0.1137255
+      objectReference: {fileID: 0}
+    - target: {fileID: 4475104351571827457, guid: 09cca5a9f0bb94210b0bceca65582b08, type: 3}
       propertyPath: waitingForPlayer
       value: 
       objectReference: {fileID: 1287494201}

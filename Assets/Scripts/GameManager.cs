@@ -32,6 +32,9 @@ public class GameManager : NetworkBehaviour
     public Image player1Check;
     public Image player2Check;
 
+    public Color PLAYER1COLOR;
+    public Color PLAYER2COLOR;
+
     //private bool player1Retry;
     //private bool player2Retry;
 
@@ -186,13 +189,19 @@ public class GameManager : NetworkBehaviour
         playerTurn.Value = currentPlayer.ToString();
         
         SetCurrentPlayerText(Data.playerNames[currentPlayer]);
+        UpdateCurrentPlayerColor(currentPlayer);
+        Debug.Log($"Setting current player to {currentPlayer}");
+    }
+
+    public void UpdateCurrentPlayerColor(ulong currentPlayer)
+    {
         if (currentPlayer == 0)
         {
-            currentPlayerImage.color = Color.red;
+            currentPlayerImage.color = PLAYER1COLOR;
         }
         else
         {
-            currentPlayerImage.color = Color.blue;
+            currentPlayerImage.color = PLAYER2COLOR;
         }
     }
 
@@ -221,29 +230,36 @@ public class GameManager : NetworkBehaviour
         if (TL == MM && MM == BR && BR != -1) SetVictory();
         if (TR == MM && MM == BL && BL != -1) SetVictory();
 
-        Debug.Log($"{TL} - {TM} - {TR} - {ML} - {MM} - {MR} - {BL} - {BM} - {BR}");
+        Debug.Log($"{TL} , {TM} , {TR}\n{ML} , {MM} , {MR}\n{BL} , {BM} , {BR}");
     }
 
     public void SetVictory()
     {
-        Debug.Log("Set Victory");
+        Debug.Log("Set Victory for player:" + playerTurn.Value);
         ulong winningPlayer = 0;
         
         isGameOver.Value = true;
         
         if (playerTurn.Value == "0")
         {
+            Debug.Log("Player 0 wins");
             UpdatePlayer1Score(score1.Value++);
             winner.Value = Data.playerNames[0];
         }
-        else
+        else if (playerTurn.Value == "1")
         {
+            Debug.Log("Player 1 wins");
             UpdatePlayer2Score(score2.Value++);
             winner.Value = Data.playerNames[1];
             winningPlayer = 1;
         }
+        else
+        {
+            Debug.LogError("INCORRECT VICTORY PLAYER");
+        }
 
         SetVictoryText(winningPlayer);
+        //UpdateScoreText();
         
     }
 
@@ -255,29 +271,13 @@ public class GameManager : NetworkBehaviour
             player1Wins.transform.GetChild(1).GetComponent<TMP_Text>().SetText($"{Data.playerNames[winner]}\nWins!");
             player1Wins.GetComponentInChildren<Button>().onClick.AddListener(RetryListener);
         }
-        else
+        else if (winner == 1)
         {
             player2Wins.SetActive(true);
             player2Wins.transform.GetChild(1).GetComponent<TMP_Text>().SetText($"{Data.playerNames[winner]}\nWins!");
             player2Wins.GetComponentInChildren<Button>().onClick.AddListener(RetryListener);
         }
     }
-
-    //private void RetryListener()
-    //{
-    //    if (NetworkManager.Singleton.LocalClientId == 0)
-    //    {
-    //        player1Check.enabled = true;
-    //        player1Retry.Value = true;
-    //    }
-    //    else
-    //    {
-    //        player2Check.enabled = true;
-    //        player2Retry.Value = true;
-    //    }
-    //    CheckRematch();
-    //}
-
     
     private void RetryListener()
     {

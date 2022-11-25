@@ -139,6 +139,7 @@ public class Player : NetworkBehaviour
 
         string playerName = Data.playerNames[(ulong)int.Parse(current.ToString())];
         GameManager.Singleton.SetCurrentPlayerText(playerName);
+        GameManager.Singleton.UpdateCurrentPlayerColor((ulong)int.Parse(current.ToString()));
         currentPlayer = (ulong)int.Parse(current.ToString());
         ClearAllClicks();
     }
