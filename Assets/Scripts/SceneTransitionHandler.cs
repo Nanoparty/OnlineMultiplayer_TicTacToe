@@ -90,7 +90,7 @@ public class SceneTransitionHandler : NetworkBehaviour
         return numberOfLoadedClients == NetworkManager.Singleton.ConnectedClients.Count;
     }
 
-    public void ExitAnsLoadStartMenu()
+    public void ExitAndLoadStartMenu()
     {
         NetworkManager.Singleton.SceneManager.OnLoadComplete -= OnLoadComplete;
         OnClientLoadedScene = null;

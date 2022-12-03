@@ -11,6 +11,7 @@ public class Player : NetworkBehaviour
     private bool hasGameStarted;
     private bool isGameOver;
     private ulong currentPlayer = 0;
+    private int winner = 0;
 
     private void Awake()
     {
@@ -19,6 +20,8 @@ public class Player : NetworkBehaviour
 
     private void Update()
     {
+        if (GameManager.Singleton && GameManager.Singleton.opponentQuit) return;
+
         if (!IsLocalPlayer || !IsOwner) return;
 
 
@@ -38,14 +41,23 @@ public class Player : NetworkBehaviour
         {
             ChangePlayerTurnServerRpc(NetworkManager.Singleton.LocalClientId);
         }
+
+        
     }
 
     public override void OnNetworkDespawn()
     {
         base.OnNetworkDespawn();
-        if (IsClient)
+        if (IsServer)
         {
-
+            Debug.Log("Host detects other client disconnect");
+            GameManager.Singleton?.QuitAlertClientRpc();
+        }
+        if (!IsHost)
+        {
+            Debug.Log("Client detects Host disconnect");
+            GameManager.Singleton.QuitAlert.SetActive(true);
+            GameManager.Singleton.opponentQuit = true;
         }
 
         if (GameManager.Singleton)
@@ -54,7 +66,7 @@ public class Player : NetworkBehaviour
             GameManager.Singleton.hasGameStarted.OnValueChanged -= OnGameStartedChanged;
             GameManager.Singleton.playerTurn.OnValueChanged -= OnPlayerTurnChanged;
             GameManager.Singleton.score1.OnValueChanged -= OnScore1Changed;
-            GameManager.Singleton.score2.OnValueChanged -= OnScore2Changed;
+            GameManager.Singleton.score2.OnValueChanged -= OnScore2Changed;  
         }
     }
 
@@ -77,9 +89,9 @@ public class Player : NetworkBehaviour
         GameManager.Singleton.playerTurn.OnValueChanged += OnPlayerTurnChanged;
         GameManager.Singleton.score1.OnValueChanged += OnScore1Changed;
         GameManager.Singleton.score2.OnValueChanged += OnScore2Changed;
-        GameManager.Singleton.player1Retry.OnValueChanged += OnPlayer1Retry;
-        GameManager.Singleton.player2Retry.OnValueChanged += OnPlayer2Retry;
+        
         GameManager.Singleton.newGame.OnValueChanged += OnNewGameChanged;
+        GameManager.Singleton.winner.OnValueChanged += OnWinnerChanged;
 
         if (IsClient && IsOwner)
         {
@@ -128,9 +140,13 @@ public class Player : NetworkBehaviour
         isGameOver = newValue;
         if (newValue)
         {
-            string winner = Data.playerNames[currentPlayer];
-            GameManager.Singleton.SetVictoryText(currentPlayer);
+            GameManager.Singleton.SetVictoryText();
         }
+    }
+
+    private void OnWinnerChanged(int previous, int current)
+    {
+        GameManager.Singleton.winner.Value = current;
     }
 
     private void OnPlayerTurnChanged(FixedString32Bytes previous, FixedString32Bytes current)
@@ -146,12 +162,12 @@ public class Player : NetworkBehaviour
 
     private void OnScore1Changed(int previous, int current)
     {
-        GameManager.Singleton.UpdatePlayer1Score(current);
+        //GameManager.Singleton.UpdatePlayer1Score(current);
     }
 
     private void OnScore2Changed(int previous, int current)
     {
-        GameManager.Singleton.UpdatePlayer2Score(current);
+        //GameManager.Singleton.UpdatePlayer2Score(current);
     }
 
     private void OnPlayer1Retry(bool previous, bool current)
@@ -166,7 +182,7 @@ public class Player : NetworkBehaviour
 
     private void OnNewGameChanged(bool previous, bool current)
     {
-        GameManager.Singleton.ResetMatch();
+        //GameManager.Singleton.ResetMatch();
     }
 
     private void ClearAllClicks()
@@ -211,5 +227,11 @@ public class Player : NetworkBehaviour
     {
         GameManager.Singleton.squares[pos].GetComponent<Tile>().spawned = true;
         GameManager.Singleton.squares[pos].GetComponent<Tile>().player = int.Parse(GameManager.Singleton.playerTurn.Value.ToString());
+    }
+
+    [ClientRpc]
+    public void SetWinnerClientRPC(int i)
+    {
+        GameManager.Singleton.winner.Value = i;
     }
 }

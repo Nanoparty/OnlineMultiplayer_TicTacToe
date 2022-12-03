@@ -9,6 +9,7 @@ using UnityEngine;
 using UnityEngine.Assertions;
 using System.Linq;
 using UnityEngine.UI;
+using UnityEngine.SceneManagement;
 
 public class GameManager : NetworkBehaviour
 {
@@ -31,6 +32,7 @@ public class GameManager : NetworkBehaviour
     public GameObject player2Wins;
     public Image player1Check;
     public Image player2Check;
+    public GameObject QuitAlert;
 
     public Color PLAYER1COLOR;
     public Color PLAYER2COLOR;
@@ -49,13 +51,17 @@ public class GameManager : NetworkBehaviour
     public NetworkVariable<int> score1 { get; } = new NetworkVariable<int>(0);
     public NetworkVariable<int> score2 { get; } = new NetworkVariable<int>(0);
     public NetworkVariable<FixedString32Bytes> playerTurn { get; } = new NetworkVariable<FixedString32Bytes>("0");
-    public NetworkVariable<FixedString32Bytes> winner { get; } = new NetworkVariable<FixedString32Bytes>("0");
-    public NetworkVariable<bool> player1Retry { get; } = new NetworkVariable<bool>(false);
-    public NetworkVariable<bool> player2Retry { get; } = new NetworkVariable<bool>(false);
+    public NetworkVariable<int> winner { get; } = new NetworkVariable<int>(0);
+    
     public NetworkVariable<bool> newGame { get; } = new NetworkVariable<bool>(false);
 
+    public int winningPlayer = 0;
+    public int p1score = 0;
+    public int p2score = 0;
 
-
+    public bool p1Rematch;
+    public bool p2Rematch;
+    public bool opponentQuit;
 
     public static GameManager Singleton { get; private set; }
 
@@ -84,6 +90,7 @@ public class GameManager : NetworkBehaviour
         player2Check.enabled = false;
         player1Wins.SetActive(false);
         player2Wins.SetActive(false);
+        QuitAlert.SetActive(false);
         pieces = new List<GameObject>();
     }
 
@@ -91,6 +98,8 @@ public class GameManager : NetworkBehaviour
 
     private void Update()
     {
+        if (opponentQuit) return;
+
         if (IsCurrentGameOver()) return;
 
         if (!hasGameStarted.Value) hasGameStarted.Value = true;
@@ -110,10 +119,16 @@ public class GameManager : NetworkBehaviour
         NetworkManager.Singleton.OnClientConnectedCallback -= OnClientConnected;
     }
 
+    private void DetectHostDisconnect()
+    {
+        Debug.Log("Detect Host Disconnect");
+    }
+
     public override void OnNetworkSpawn()
     {
         if (IsClient && !IsServer)
         {
+            NetworkManager.Singleton.OnTransportFailure += DetectHostDisconnect;
             m_ClientGameOver = false;
             m_ClientGameStarted = false;
 
@@ -179,6 +194,10 @@ public class GameManager : NetworkBehaviour
 
     public void SwapPlayerTurn(ulong clientId)
     {
+        Debug.Log("ATTEMPT SWAP PLAYER");
+        if (!IsServer) return;
+        if (isGameOver.Value) return;
+
         if (playerTurn.Value.ToString() != clientId.ToString()) return;
 
         //Check for Victory before switching
@@ -207,6 +226,8 @@ public class GameManager : NetworkBehaviour
 
     private void CheckVictory()
     {
+        if (!IsServer) return;
+
         int TL = squares[0].GetComponent<Tile>().player;
         int TM = squares[1].GetComponent<Tile>().player;
         int TR = squares[2].GetComponent<Tile>().player;
@@ -219,16 +240,50 @@ public class GameManager : NetworkBehaviour
         int BM = squares[7].GetComponent<Tile>().player;
         int BR = squares[8].GetComponent<Tile>().player;
 
-        if (TL == TM && TM == TR && TL != -1) SetVictory();
-        if (ML == MM && MM == MR && MR != -1) SetVictory();
-        if (BL == BM && BM == BR && BR != -1) SetVictory();
+        if (TL == TM && TM == TR && TL != -1)
+        {
+            SetVictory();
+            return;
+        }
 
-        if (TL == ML && ML == BL && BL != -1) SetVictory();
-        if (TM == MM && MM == BM && BM != -1) SetVictory();
-        if (TR == MR && MR == BR && BR != -1) SetVictory();
+        if (ML == MM && MM == MR && MR != -1)
+        {
+            SetVictory();
+            return;
+        }
 
-        if (TL == MM && MM == BR && BR != -1) SetVictory();
-        if (TR == MM && MM == BL && BL != -1) SetVictory();
+        if (BL == BM && BM == BR && BR != -1)
+        {
+            SetVictory();
+            return;
+        }
+
+        if (TL == ML && ML == BL && BL != -1)
+        {
+            SetVictory();
+            return;
+        }
+        if (TM == MM && MM == BM && BM != -1)
+        {
+            SetVictory();
+            return;
+        }
+        if (TR == MR && MR == BR && BR != -1)
+        {
+            SetVictory();
+            return;
+        }
+
+        if (TL == MM && MM == BR && BR != -1)
+        {
+            SetVictory();
+            return;
+        }
+        if (TR == MM && MM == BL && BL != -1)
+        {
+            SetVictory();
+            return;
+        }
 
         Debug.Log($"{TL} , {TM} , {TR}\n{ML} , {MM} , {MR}\n{BL} , {BM} , {BR}");
     }
@@ -236,45 +291,47 @@ public class GameManager : NetworkBehaviour
     public void SetVictory()
     {
         Debug.Log("Set Victory for player:" + playerTurn.Value);
-        ulong winningPlayer = 0;
         
-        isGameOver.Value = true;
-        
-        if (playerTurn.Value == "0")
+        if (playerTurn.Value.ToString() == "0")
         {
             Debug.Log("Player 0 wins");
-            UpdatePlayer1Score(score1.Value++);
-            winner.Value = Data.playerNames[0];
+            UpdatePlayer1ScoreClientRpc(p1score + 1);
+            winner.Value = 0;
+            SetWinnerClientRpc(0);
         }
-        else if (playerTurn.Value == "1")
+        else if (playerTurn.Value.ToString() == "1")
         {
             Debug.Log("Player 1 wins");
-            UpdatePlayer2Score(score2.Value++);
-            winner.Value = Data.playerNames[1];
-            winningPlayer = 1;
+            UpdatePlayer2ScoreClientRpc(p2score + 1);
+            winner.Value = 1;
+            SetWinnerClientRpc(1);
         }
         else
         {
             Debug.LogError("INCORRECT VICTORY PLAYER");
         }
 
-        SetVictoryText(winningPlayer);
-        //UpdateScoreText();
-        
+        SetVictoryText();
+
+        isGameOver.Value = true;
+
     }
 
-    public void SetVictoryText(ulong winner)
+    public void SetVictoryText()
     {
-        if (winner == 0)
+        Debug.Log("Setting Victory text while GameOver = " + isGameOver.Value);
+        if (winningPlayer == 0)
         {
+            Debug.Log("Set P1 Victory Banner");
             player1Wins.SetActive(true);
-            player1Wins.transform.GetChild(1).GetComponent<TMP_Text>().SetText($"{Data.playerNames[winner]}\nWins!");
+            player1Wins.transform.GetChild(1).GetComponent<TMP_Text>().SetText($"{Data.playerNames[(ulong)winningPlayer]}\nWins!");
             player1Wins.GetComponentInChildren<Button>().onClick.AddListener(RetryListener);
         }
-        else if (winner == 1)
+        else if (winningPlayer  == 1)
         {
+            Debug.Log("Set P2 Victory Banner");
             player2Wins.SetActive(true);
-            player2Wins.transform.GetChild(1).GetComponent<TMP_Text>().SetText($"{Data.playerNames[winner]}\nWins!");
+            player2Wins.transform.GetChild(1).GetComponent<TMP_Text>().SetText($"{Data.playerNames[(ulong)winningPlayer]}\nWins!");
             player2Wins.GetComponentInChildren<Button>().onClick.AddListener(RetryListener);
         }
     }
@@ -284,6 +341,7 @@ public class GameManager : NetworkBehaviour
         if (NetworkManager.Singleton.LocalClientId == 0)
         {
             SetPlayer1CheckServerRpc();
+            
         }
         else
         {
@@ -295,28 +353,31 @@ public class GameManager : NetworkBehaviour
     [ServerRpc(RequireOwnership = false)]
     private void SetPlayer1CheckServerRpc()
     {
-        player1Check.enabled = true;
-        player1Retry.Value = true;
+        p1Rematch = true;
+        SetRematchClientRpc(0, true);
         CheckRematch();
     }
 
     [ServerRpc(RequireOwnership = false)]
     private void SetPlayer2CheckServerRpc()
     {
-        player2Check.enabled = true;
-        player2Retry.Value = true;
+        p2Rematch = true;
+        SetRematchClientRpc(1, true);
         CheckRematch();
     }
 
     private void CheckRematch()
     {
-        if (player1Retry.Value && player2Retry.Value)
+        if (p1Rematch && p2Rematch)
         {
-            newGame.Value = true;
+            //newGame.Value = true;
+            
+            ResetMatchClientRpc();
         }
     }
 
-    public void ResetMatch()
+    [ClientRpc]
+    public void ResetMatchClientRpc()
     {
         player1Wins.SetActive(false);
         player2Wins.SetActive(false);
@@ -335,10 +396,11 @@ public class GameManager : NetworkBehaviour
         player2Check.enabled = false;
 
         ulong currentPlayer = 0;
-        //playerTurn.Value = currentPlayer.ToString();
 
         SetCurrentPlayerText(Data.playerNames[currentPlayer]);
-        currentPlayerImage.color = Color.red;
+        currentPlayerImage.color = PLAYER1COLOR;
+
+        Debug.Log("Reset Client RPC");
 
         ResetServerRpc();
     }
@@ -348,39 +410,88 @@ public class GameManager : NetworkBehaviour
     {
         isGameOver.Value = false;
         newGame.Value = false;
-        player2Retry.Value = false;
-        player2Retry.Value = false;
+        p1Rematch = false;
+        p2Rematch = false;
         playerTurn.Value = "0";
         hasGameStarted.Value = true;
+        SetRematchClientRpc(0, false);
+        SetRematchClientRpc(1, false);
     }
 
     public void UpdatePlayer1Retry(bool b)
     {
-        player1Retry.Value = b;
-        player1Check.enabled = b;
+        //player1Retry.Value = b;
+        //player1Check.enabled = b;
     }
 
     public void UpdatePlayer2Retry(bool b)
     {
-        player2Retry.Value = b;
-        player2Check.enabled = b;
+        //player2Retry.Value = b;
+        //player2Check.enabled = b;
     }
 
-    public void UpdatePlayer1Score(int s)
+    [ClientRpc]
+    public void UpdatePlayer1ScoreClientRpc(int s)
     {
-        score1.Value = s;
+        p1score = s;
         player1Score.SetText("Score - " + s);
     }
 
-    public void UpdatePlayer2Score(int s)
+    [ClientRpc]
+    public void UpdatePlayer2ScoreClientRpc(int s)
     {
-        score2.Value = s;
+        p2score = s;
         player2Score.SetText("Score - " + s);
     }
 
     public void ExitGame()
     {
-        NetworkManager.Singleton.Shutdown();
-        SceneTransitionHandler.sceneTransitionHandler.ExitAnsLoadStartMenu();
+        if (IsHost)
+        {
+            NetworkManager.Singleton.Shutdown();
+            SceneTransitionHandler.sceneTransitionHandler.ExitAndLoadStartMenu();
+        }
+        else
+        {
+            QuitAlertServerRpc();
+            NetworkManager.Singleton.Shutdown();
+            SceneManager.LoadScene("Menu", LoadSceneMode.Single);
+        }
+        
+    }
+
+    [ClientRpc]
+    private void SetWinnerClientRpc(int i)
+    {
+        winningPlayer = i;
+    }
+
+    [ClientRpc]
+    private void SetRematchClientRpc(int player, bool status)
+    {
+        if (player == 0)
+        {
+            Debug.Log("Set Player 1 Checkmark " + status + " " + Time.realtimeSinceStartup);
+            player1Check.enabled = status;
+        }
+        else if (player == 1)
+        {
+            Debug.Log("Set Player 2 Checkmark " + status + " " + Time.realtimeSinceStartup);
+            player2Check.enabled = status;
+        }
+    }
+
+    [ClientRpc]
+    public void QuitAlertClientRpc()
+    {
+        QuitAlert.SetActive(true);
+        opponentQuit = true;
+    }
+
+    [ServerRpc(RequireOwnership = false)]
+    public void QuitAlertServerRpc()
+    {
+        QuitAlert.SetActive(true);
+        opponentQuit = true;
     }
 }

@@ -213,6 +213,6 @@ public class LobbyManager : NetworkBehaviour
     public void ExitGame()
     {
         NetworkManager.Singleton.Shutdown();
-        SceneTransitionHandler.sceneTransitionHandler.ExitAnsLoadStartMenu();
+        SceneTransitionHandler.sceneTransitionHandler.ExitAndLoadStartMenu();
     }
 }
