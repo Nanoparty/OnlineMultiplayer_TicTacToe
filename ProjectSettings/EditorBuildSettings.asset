@@ -17,4 +17,7 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Scenes/LocalMatch.unity
     guid: 7b9e4212b409a46498af8a7bbdf2e7fc
+  - enabled: 1
+    path: Assets/Scenes/LocalMultiplayer.unity
+    guid: 4e5f20bfbf3944f7baf5268754fad1ed
   m_configObjects: {}

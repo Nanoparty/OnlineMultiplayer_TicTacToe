@@ -52,7 +52,7 @@ public class MenuManager : MonoBehaviour
                 player1 = LocalMenu.transform.GetChild(1).GetComponent<TMP_InputField>().text;
                 player2 = LocalMenu.transform.GetChild(2).GetComponent<TMP_InputField>().text;
                 UpdateData();
-                SceneManager.LoadScene("Match", LoadSceneMode.Single);
+                SceneManager.LoadScene("LocalMultiplayer", LoadSceneMode.Single);
             });
             LocalMenu.transform.GetChild(4).GetComponent<Button>().onClick.AddListener(() =>
             {
