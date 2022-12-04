@@ -15,6 +15,7 @@ public class LobbyManager : NetworkBehaviour
     private int maximumPlayerCount = 2;
 
     public TMP_Text lobbyText;
+    public TMP_Text ipAddress;
     private bool allPlayersInLobby;
 
     private Dictionary<ulong, bool> clientsInLobby;
@@ -24,6 +25,8 @@ public class LobbyManager : NetworkBehaviour
     public override void OnNetworkSpawn()
     {
         base.OnNetworkSpawn();
+
+        ipAddress.SetText(Data.ipAddress);
 
         clientsInLobby = new Dictionary<ulong, bool>();
         clientNames = new Dictionary<ulong, string>();

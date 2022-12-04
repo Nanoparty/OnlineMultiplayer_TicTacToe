@@ -1,5 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
+using System.Net;
 using TMPro;
 using Unity.Netcode;
 using Unity.Netcode.Transports.UTP;
@@ -81,7 +83,7 @@ public class MenuManager : MonoBehaviour
             JoinMenu.transform.GetChild(3).GetComponent<Button>().onClick.AddListener(() => {
                 player2 = JoinMenu.transform.GetChild(1).GetComponent<TMP_InputField>().text;
                 ipAddress = JoinMenu.transform.GetChild(2).GetComponent<TMP_InputField>().text;
-                JoinLocalGame(player2);
+                JoinLocalGame(player2, ipAddress);
             });
             JoinMenu.transform.GetChild(4).GetComponent<Button>().onClick.AddListener(() =>
             {
@@ -101,6 +103,14 @@ public class MenuManager : MonoBehaviour
 
     public void StartLocalGame(string name)
     {
+        ipAddress = GetLocalIPv4();
+        Data.ipAddress = ipAddress;
+        Debug.Log(ipAddress);
+        NetworkManager.Singleton.GetComponent<UnityTransport>().SetConnectionData(
+            ipAddress,  // The IP address is a string
+            (ushort)3030, // The port number is an unsigned short
+            ipAddress // The server listen address is a string.
+        );
         if (NetworkManager.Singleton.StartHost())
         {
             Data.AddPlayerName(NetworkManager.Singleton.LocalClientId, name);
@@ -114,8 +124,14 @@ public class MenuManager : MonoBehaviour
         }
     }
 
-    public void JoinLocalGame(string name)
+    public void JoinLocalGame(string name, string ipAddress)
     {
+        Data.ipAddress = ipAddress;
+        NetworkManager.Singleton.GetComponent<UnityTransport>().SetConnectionData(
+            ipAddress,  // The IP address is a string
+            (ushort)3030, // The port number is an unsigned short
+            ipAddress // The server listen address is a string.
+        );
         if (NetworkManager.Singleton.StartClient())
         {
             //Debug.Log("LocalClientId:" + NetworkManager.Singleton.LocalClientId);
@@ -126,5 +142,13 @@ public class MenuManager : MonoBehaviour
         {
             Debug.LogError("Failed to start client.");
         }
+    }
+
+    public string GetLocalIPv4()
+    {
+        return Dns.GetHostEntry(Dns.GetHostName())
+            .AddressList.First(
+                f => f.AddressFamily == System.Net.Sockets.AddressFamily.InterNetwork)
+            .ToString();
     }
 }
