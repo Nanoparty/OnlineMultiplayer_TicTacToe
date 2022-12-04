@@ -18,6 +18,7 @@ public class Tile : MonoBehaviour
     {
         if (Input.GetKey(KeyCode.Mouse0)){
             clicked = true;
+            Debug.Log("Clicked tile");
         }
     }
 

@@ -30,6 +30,7 @@ public class GameManager : NetworkBehaviour
     public TMP_Text winnerText;
     public GameObject player1Wins;
     public GameObject player2Wins;
+    public GameObject tie;
     public Image player1Check;
     public Image player2Check;
     public GameObject QuitAlert;
@@ -90,6 +91,7 @@ public class GameManager : NetworkBehaviour
         player2Check.enabled = false;
         player1Wins.SetActive(false);
         player2Wins.SetActive(false);
+        tie.SetActive(false);
         QuitAlert.SetActive(false);
         pieces = new List<GameObject>();
     }
@@ -286,6 +288,13 @@ public class GameManager : NetworkBehaviour
         }
 
         Debug.Log($"{TL} , {TM} , {TR}\n{ML} , {MM} , {MR}\n{BL} , {BM} , {BR}");
+
+        if (pieces.Count == 9 && !isGameOver.Value)
+        {
+            SetWinnerClientRpc(2);
+            SetVictoryText();
+            isGameOver.Value = true;
+        }
     }
 
     public void SetVictory()
@@ -333,6 +342,10 @@ public class GameManager : NetworkBehaviour
             player2Wins.SetActive(true);
             player2Wins.transform.GetChild(1).GetComponent<TMP_Text>().SetText($"{Data.playerNames[(ulong)winningPlayer]}\nWins!");
             player2Wins.GetComponentInChildren<Button>().onClick.AddListener(RetryListener);
+        }else if (winningPlayer == 2)
+        {
+            tie.SetActive(true);
+            tie.GetComponentInChildren<Button>().onClick.AddListener(RetryListener);
         }
     }
     
@@ -381,6 +394,7 @@ public class GameManager : NetworkBehaviour
     {
         player1Wins.SetActive(false);
         player2Wins.SetActive(false);
+        tie.SetActive(false);
 
         foreach(var s in squares)
         {
@@ -394,6 +408,7 @@ public class GameManager : NetworkBehaviour
 
         player1Check.enabled = false;
         player2Check.enabled = false;
+    
 
         ulong currentPlayer = 0;
 
