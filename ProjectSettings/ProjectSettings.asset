@@ -889,11 +889,11 @@ PlayerSettings:
     m_VersionName: 
   apiCompatibilityLevel: 6
   activeInputHandler: 0
-  cloudProjectId: 
+  cloudProjectId: 4fde668e-1fb8-44ef-87f5-9a04b5571abb
   framebufferDepthMemorylessMode: 0
   qualitySettingsNames: []
-  projectName: 
-  organizationId: 
+  projectName: TicTacToe
+  organizationId: nathan-foote
   cloudEnabled: 0
   legacyClampBlendShapeWeights: 0
   playerDataPath: 

@@ -10,6 +10,7 @@ public static class Data
     public static string player1;
     public static string player2;
     public static string localName;
+    public static string joinCode;
 
     public static Dictionary<ulong, string> playerNames = new Dictionary<ulong, string>();
 

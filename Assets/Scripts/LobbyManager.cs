@@ -26,7 +26,7 @@ public class LobbyManager : NetworkBehaviour
     {
         base.OnNetworkSpawn();
 
-        ipAddress.SetText(Data.ipAddress);
+        ipAddress.SetText(Data.joinCode);
 
         clientsInLobby = new Dictionary<ulong, bool>();
         clientNames = new Dictionary<ulong, string>();

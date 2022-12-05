@@ -5,6 +5,11 @@ using System.Net;
 using TMPro;
 using Unity.Netcode;
 using Unity.Netcode.Transports.UTP;
+using Unity.Networking.Transport.Relay;
+using Unity.Services.Authentication;
+using Unity.Services.Core;
+using Unity.Services.Relay;
+using Unity.Services.Relay.Models;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
@@ -101,46 +106,123 @@ public class MenuManager : MonoBehaviour
         Data.player2 = player2;
     }
 
-    public void StartLocalGame(string name)
+    public async void StartLocalGame(string name)
     {
-        ipAddress = GetLocalIPv4();
-        Data.ipAddress = ipAddress;
-        Debug.Log(ipAddress);
-        NetworkManager.Singleton.GetComponent<UnityTransport>().SetConnectionData(
-            ipAddress,  // The IP address is a string
-            (ushort)3030, // The port number is an unsigned short
-            ipAddress // The server listen address is a string.
-        );
-        if (NetworkManager.Singleton.StartHost())
+        await UnityServices.InitializeAsync();
+
+        AuthenticationService.Instance.SignedIn += () =>
         {
-            Data.AddPlayerName(NetworkManager.Singleton.LocalClientId, name);
-            //Data.AddPlayerName( = name;
-            SceneTransitionHandler.sceneTransitionHandler.RegisterCallbacks();
-            SceneTransitionHandler.sceneTransitionHandler.SwitchScene("Lobby");
+            Debug.Log($"Signed in as {AuthenticationService.Instance.PlayerId}");
+        };
+
+        await AuthenticationService.Instance.SignInAnonymouslyAsync();
+
+        CreateRelay(name);
+
+        //ipAddress = GetLocalIPv4();
+        //Data.ipAddress = ipAddress;
+        //Debug.Log(ipAddress);
+        //NetworkManager.Singleton.GetComponent<UnityTransport>().SetConnectionData(
+        //    ipAddress,  // The IP address is a string
+        //    (ushort)3030, // The port number is an unsigned short
+        //    ipAddress // The server listen address is a string.
+        //);
+        //if (NetworkManager.Singleton.StartHost())
+        //{
+        //    Data.AddPlayerName(NetworkManager.Singleton.LocalClientId, name);
+        //    //Data.AddPlayerName( = name;
+        //    SceneTransitionHandler.sceneTransitionHandler.RegisterCallbacks();
+        //    SceneTransitionHandler.sceneTransitionHandler.SwitchScene("Lobby");
+        //}
+        //else
+        //{
+        //    Debug.LogError("Failed to start host.");
+        //}
+    }
+
+    public async void CreateRelay(string name)
+    {
+        try
+        {
+            Allocation allocation = await RelayService.Instance.CreateAllocationAsync(1);
+
+            string joinCode = await RelayService.Instance.GetJoinCodeAsync(allocation.AllocationId);
+            Debug.Log("Join Code:" + joinCode);
+            Data.joinCode = joinCode;
+
+            RelayServerData relayServerData = new RelayServerData(allocation, "dtls");
+
+            NetworkManager.Singleton.GetComponent<UnityTransport>().SetRelayServerData(relayServerData);
+
+            if (NetworkManager.Singleton.StartHost())
+            {
+                Data.AddPlayerName(NetworkManager.Singleton.LocalClientId, name);
+                SceneTransitionHandler.sceneTransitionHandler.RegisterCallbacks();
+                SceneTransitionHandler.sceneTransitionHandler.SwitchScene("Lobby");
+            }
+            else
+            {
+                Debug.LogError("Failed to start host.");
+            }
         }
-        else
+        catch (RelayServiceException e)
         {
-            Debug.LogError("Failed to start host.");
+            Debug.Log("Create Relay Failed.\n" + e);
         }
     }
 
-    public void JoinLocalGame(string name, string ipAddress)
+    public async void JoinLocalGame(string name, string joinCode)
     {
-        Data.ipAddress = ipAddress;
-        NetworkManager.Singleton.GetComponent<UnityTransport>().SetConnectionData(
-            ipAddress,  // The IP address is a string
-            (ushort)3030, // The port number is an unsigned short
-            ipAddress // The server listen address is a string.
-        );
-        if (NetworkManager.Singleton.StartClient())
+        await UnityServices.InitializeAsync();
+
+        AuthenticationService.Instance.SignedIn += () =>
         {
-            //Debug.Log("LocalClientId:" + NetworkManager.Singleton.LocalClientId);
-            //Data.AddPlayerName(NetworkManager.Singleton.LocalClientId, name);
-            Data.localName = name;
+            Debug.Log($"Signed in as {AuthenticationService.Instance.PlayerId}");
+        };
+
+        JoinRelay(joinCode, name);
+        //Data.ipAddress = ipAddress;
+        //NetworkManager.Singleton.GetComponent<UnityTransport>().SetConnectionData(
+        //    ipAddress,  // The IP address is a string
+        //    (ushort)3030, // The port number is an unsigned short
+        //    ipAddress // The server listen address is a string.
+        //);
+        //if (NetworkManager.Singleton.StartClient())
+        //{
+        //    //Debug.Log("LocalClientId:" + NetworkManager.Singleton.LocalClientId);
+        //    //Data.AddPlayerName(NetworkManager.Singleton.LocalClientId, name);
+        //    Data.localName = name;
+        //}
+        //else
+        //{
+        //    Debug.LogError("Failed to start client.");
+        //}
+    }
+
+    private async void JoinRelay(string joinCode, string name)
+    {
+        await AuthenticationService.Instance.SignInAnonymouslyAsync();
+
+        try
+        {
+            JoinAllocation joinAllocation = await RelayService.Instance.JoinAllocationAsync(joinCode);
+
+            RelayServerData relayServerData = new RelayServerData(joinAllocation, "dtls");
+
+            NetworkManager.Singleton.GetComponent<UnityTransport>().SetRelayServerData(relayServerData);
+
+            if (NetworkManager.Singleton.StartClient())
+            { 
+                Data.localName = name;
+            }
+            else
+            {
+                Debug.LogError("Failed to start client.");
+            }
         }
-        else
+        catch (RelayServiceException e)
         {
-            Debug.LogError("Failed to start client.");
+            Debug.Log("Join Relay Failed.\n" + e);
         }
     }
 
