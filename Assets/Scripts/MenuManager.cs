@@ -35,11 +35,14 @@ public class MenuManager : MonoBehaviour
 
     private void Start()
     {
+        AudioManager.am.PlayMenuMusic();
         Single.onClick.AddListener(() =>
         {
+            AudioManager.am.PlayClick1();
             MainMenu.SetActive(false);
             SingleMenu.SetActive(true);
             SingleMenu.transform.GetChild(2).GetComponent<Button>().onClick.AddListener(() => {
+                AudioManager.am.PlayClick1();
                 player1 = SingleMenu.GetComponentInChildren<TMP_InputField>().text;
                 Data.localName = player1;
                 //UpdateData();
@@ -47,15 +50,18 @@ public class MenuManager : MonoBehaviour
             });
             SingleMenu.transform.GetChild(3).GetComponent<Button>().onClick.AddListener(() =>
             {
+                AudioManager.am.PlayClick1();
                 MainMenu.SetActive(true);
                 SingleMenu.SetActive(false);
             });
         });
         LocalMulti.onClick.AddListener(() =>
         {
+            AudioManager.am.PlayClick1();
             MainMenu.SetActive(false);
             LocalMenu.SetActive(true);
             LocalMenu.transform.GetChild(3).GetComponent<Button>().onClick.AddListener(() => {
+                AudioManager.am.PlayClick1();
                 player1 = LocalMenu.transform.GetChild(1).GetComponent<TMP_InputField>().text;
                 player2 = LocalMenu.transform.GetChild(2).GetComponent<TMP_InputField>().text;
                 UpdateData();
@@ -63,35 +69,42 @@ public class MenuManager : MonoBehaviour
             });
             LocalMenu.transform.GetChild(4).GetComponent<Button>().onClick.AddListener(() =>
             {
+                AudioManager.am.PlayClick1();
                 MainMenu.SetActive(true);
                 LocalMenu.SetActive(false);
             });
         });
         Host.onClick.AddListener(() =>
         {
+            AudioManager.am.PlayClick1();
             MainMenu.SetActive(false);
             HostMenu.SetActive(true);
             HostMenu.transform.GetChild(2).GetComponent<Button>().onClick.AddListener(() => {
+                AudioManager.am.PlayClick1();
                 player1 = HostMenu.GetComponentInChildren<TMP_InputField>().text;
                 StartLocalGame(player1);
             });
             HostMenu.transform.GetChild(3).GetComponent<Button>().onClick.AddListener(() =>
             {
+                AudioManager.am.PlayClick1();
                 MainMenu.SetActive(true);
                 HostMenu.SetActive(false);
             });
         });
         Join.onClick.AddListener(() =>
         {
+            AudioManager.am.PlayClick1();
             MainMenu.SetActive(false);
             JoinMenu.SetActive(true);
             JoinMenu.transform.GetChild(3).GetComponent<Button>().onClick.AddListener(() => {
+                AudioManager.am.PlayClick1();
                 player2 = JoinMenu.transform.GetChild(1).GetComponent<TMP_InputField>().text;
                 ipAddress = JoinMenu.transform.GetChild(2).GetComponent<TMP_InputField>().text;
                 JoinLocalGame(player2, ipAddress);
             });
             JoinMenu.transform.GetChild(4).GetComponent<Button>().onClick.AddListener(() =>
             {
+                AudioManager.am.PlayClick1();
                 MainMenu.SetActive(true);
                 JoinMenu.SetActive(false);
             });

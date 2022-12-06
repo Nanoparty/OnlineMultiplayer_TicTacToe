@@ -190,6 +190,7 @@ public class LobbyManager : NetworkBehaviour
 
     public void PlayerIsReady()
     {
+        AudioManager.am.PlayClick1();
         Debug.Log("Player is Ready");
         clientsInLobby[NetworkManager.Singleton.LocalClientId] = true;
         if (IsServer)
@@ -246,6 +247,7 @@ public class LobbyManager : NetworkBehaviour
 
     public void ExitGame()
     {
+        AudioManager.am.PlayClick1();
         if (IsServer)
         {
             ExitGameClientRpc();
@@ -266,6 +268,9 @@ public class LobbyManager : NetworkBehaviour
 
     public void CopyJoinCodeToClipboard()
     {
-        UnityEditor.EditorGUIUtility.systemCopyBuffer = Data.joinCode;
+        TextEditor editor = new TextEditor();
+        editor.text = Data.joinCode;
+        editor.SelectAll();
+        editor.Copy();
     }
 }

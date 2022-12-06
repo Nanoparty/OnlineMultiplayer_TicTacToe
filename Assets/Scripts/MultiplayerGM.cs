@@ -44,6 +44,7 @@ public class MultiplayerGM : MonoBehaviour
 
     private void Start()
     {
+        AudioManager.am.PlayGameMusic();
         player1Name = Data.player1 ?? "Player 1";
         player2Name = Data.player2 ?? "Player 2";
 
@@ -53,7 +54,7 @@ public class MultiplayerGM : MonoBehaviour
         playerQuit.SetActive(false);
         //currentPlayer.SetActive(false);
         SetCurrentPlayerText();
-        quit.onClick.AddListener(() => { SceneManager.LoadScene("Menu", LoadSceneMode.Single); });
+        quit.onClick.AddListener(() => { AudioManager.am.PlayClick1(); SceneManager.LoadScene("Menu", LoadSceneMode.Single); });
 
         player1Text.SetText(Data.localName ?? "Player 1");
         player2Text.SetText("Player 2");
@@ -199,6 +200,7 @@ public class MultiplayerGM : MonoBehaviour
 
     private void SetVictory()
     {
+        AudioManager.am.PlayWin();
         victory = true;
         if (playerTurn)
         {
@@ -224,6 +226,7 @@ public class MultiplayerGM : MonoBehaviour
 
     private void SetTie()
     {
+        AudioManager.am.PlayTie();
         victory = true;
         tie.SetActive(true);
         tie.GetComponentInChildren<Button>().onClick.AddListener(ResetGame);
@@ -231,6 +234,7 @@ public class MultiplayerGM : MonoBehaviour
 
     private void ResetGame()
     {
+        AudioManager.am.PlayClick1();
         redWins.SetActive(false);
         blueWins.SetActive(false);
         tie.SetActive(false);

@@ -38,12 +38,13 @@ public class LocalGameManager : MonoBehaviour
 
     private void Start()
     {
+        AudioManager.am.PlayGameMusic();
         blueWins.SetActive(false);
         tie.SetActive(false);
         redWins.SetActive(false);
         playerQuit.SetActive(false);
         currentPlayer.SetActive(false);
-        quit.onClick.AddListener(() => { SceneManager.LoadScene("Menu", LoadSceneMode.Single); });
+        quit.onClick.AddListener(() => { AudioManager.am.PlayClick1();  SceneManager.LoadScene("Menu", LoadSceneMode.Single); });
 
         player1Text.SetText(Data.localName ?? "Player 1");
         player2Text.SetText("Player 2");
@@ -156,6 +157,8 @@ public class LocalGameManager : MonoBehaviour
         victory = true;
         if (playerTurn)
         {
+            
+            AudioManager.am.PlayLose();
             winner = "Player 2";
             blueWins.SetActive(true);
             score2++;
@@ -164,6 +167,7 @@ public class LocalGameManager : MonoBehaviour
         }
         else
         {
+            AudioManager.am.PlayWin();
             winner = "Player 1";
             redWins.SetActive(true);
             score1++;
@@ -177,6 +181,7 @@ public class LocalGameManager : MonoBehaviour
 
     private void SetTie()
     {
+        AudioManager.am.PlayTie();
         victory = true;
         tie.SetActive(true);
         tie.GetComponentInChildren<Button>().onClick.AddListener(ResetGame);
@@ -184,6 +189,7 @@ public class LocalGameManager : MonoBehaviour
 
     private void ResetGame()
     {
+        AudioManager.am.PlayClick1();
         redWins.SetActive(false);
         blueWins.SetActive(false);
         tie.SetActive(false);

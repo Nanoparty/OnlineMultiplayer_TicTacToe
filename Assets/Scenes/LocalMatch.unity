@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 0}
-  m_IndirectSpecularColor: {r: 0.45141798, g: 0.5008521, b: 0.5720095, a: 1}
+  m_IndirectSpecularColor: {r: 0.45141852, g: 0.50085306, b: 0.5720107, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -271,6 +271,18 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 3796078680497130282, guid: 9e37e124c2cb54c2da39d82c3911ce41, type: 3}
+      propertyPath: m_IsTrigger
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3796078680592628290, guid: 9e37e124c2cb54c2da39d82c3911ce41, type: 3}
+      propertyPath: m_IsTrigger
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3796078680873391088, guid: 9e37e124c2cb54c2da39d82c3911ce41, type: 3}
+      propertyPath: m_IsTrigger
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 3796078681326969744, guid: 9e37e124c2cb54c2da39d82c3911ce41, type: 3}
       propertyPath: m_RootOrder
       value: 5
@@ -318,6 +330,30 @@ PrefabInstance:
     - target: {fileID: 3796078681326969745, guid: 9e37e124c2cb54c2da39d82c3911ce41, type: 3}
       propertyPath: m_Name
       value: Click Points
+      objectReference: {fileID: 0}
+    - target: {fileID: 3796078681532446520, guid: 9e37e124c2cb54c2da39d82c3911ce41, type: 3}
+      propertyPath: m_IsTrigger
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3796078681806743795, guid: 9e37e124c2cb54c2da39d82c3911ce41, type: 3}
+      propertyPath: m_IsTrigger
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3796078681933652770, guid: 9e37e124c2cb54c2da39d82c3911ce41, type: 3}
+      propertyPath: m_IsTrigger
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3796078682325313875, guid: 9e37e124c2cb54c2da39d82c3911ce41, type: 3}
+      propertyPath: m_IsTrigger
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3796078682362352472, guid: 9e37e124c2cb54c2da39d82c3911ce41, type: 3}
+      propertyPath: m_IsTrigger
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3796078682398802391, guid: 9e37e124c2cb54c2da39d82c3911ce41, type: 3}
+      propertyPath: m_IsTrigger
+      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 9e37e124c2cb54c2da39d82c3911ce41, type: 3}

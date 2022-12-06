@@ -68,6 +68,7 @@ public class GameManager : NetworkBehaviour
 
     private void Awake()
     {
+        AudioManager.am.PlayGameMusic();
         Assert.IsNull(Singleton, $"Multiple instances of {nameof(GameManager)} detected. This should not happen.");
         Singleton = this;
 
@@ -351,6 +352,7 @@ public class GameManager : NetworkBehaviour
     
     private void RetryListener()
     {
+        AudioManager.am.PlayClick1();
         if (NetworkManager.Singleton.LocalClientId == 0)
         {
             SetPlayer1CheckServerRpc();
@@ -461,6 +463,7 @@ public class GameManager : NetworkBehaviour
 
     public void ExitGame()
     {
+        AudioManager.am.PlayClick1();
         if (IsHost)
         {
             NetworkManager.Singleton.Shutdown();
@@ -479,6 +482,17 @@ public class GameManager : NetworkBehaviour
     private void SetWinnerClientRpc(int i)
     {
         winningPlayer = i;
+        if (winningPlayer == (int)NetworkManager.Singleton.LocalClientId)
+        {
+            AudioManager.am.PlayWin();
+        }
+        else if (i == 2)
+        {
+            AudioManager.am.PlayTie();
+        }else
+        {
+            AudioManager.am.PlayLose();
+        }
     }
 
     [ClientRpc]
