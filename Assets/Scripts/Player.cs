@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using Unity.Collections;
 using Unity.Netcode;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class Player : NetworkBehaviour
 {
@@ -59,12 +60,8 @@ public class Player : NetworkBehaviour
         if (!IsHost)
         {
             Debug.Log("Client Detects Disconnect");
-            GameObject lm = GameObject.Find("LobbyControl");
-            if (lm)
-            {
-                Debug.Log("Found Lobby");
-                lm.GetComponent<LobbyManager>().ExitGameClientRpc();
-            }
+            NetworkManager.Shutdown();
+            SceneManager.LoadScene("Menu", LoadSceneMode.Single);
         }
         
 
