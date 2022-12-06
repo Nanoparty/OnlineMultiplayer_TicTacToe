@@ -56,8 +56,8 @@ public class MultiplayerGM : MonoBehaviour
         SetCurrentPlayerText();
         quit.onClick.AddListener(() => { AudioManager.am.PlayClick1(); SceneManager.LoadScene("Menu", LoadSceneMode.Single); });
 
-        player1Text.SetText(Data.localName ?? "Player 1");
-        player2Text.SetText("Player 2");
+        player1Text.SetText(player1Name);
+        player2Text.SetText(player2Name);
 
         playerTurn = true;
         boardPieces = new List<GameObject>();

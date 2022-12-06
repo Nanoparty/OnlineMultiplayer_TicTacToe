@@ -64,7 +64,9 @@ public class MenuManager : MonoBehaviour
                 AudioManager.am.PlayClick1();
                 player1 = LocalMenu.transform.GetChild(1).GetComponent<TMP_InputField>().text;
                 player2 = LocalMenu.transform.GetChild(2).GetComponent<TMP_InputField>().text;
-                UpdateData();
+                Data.player1 = player1;
+                Data.player2 = player2;
+                //UpdateData();
                 SceneManager.LoadScene("LocalMultiplayer", LoadSceneMode.Single);
             });
             LocalMenu.transform.GetChild(4).GetComponent<Button>().onClick.AddListener(() =>
@@ -155,6 +157,7 @@ public class MenuManager : MonoBehaviour
 
             if (NetworkManager.Singleton.StartHost())
             {
+                
                 Debug.Log("Starting Host");
                 Data.AddPlayerName(NetworkManager.Singleton.LocalClientId, name);
                 SceneTransitionHandler.sceneTransitionHandler.RegisterCallbacks();
