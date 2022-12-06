@@ -121,7 +121,7 @@ public class LobbyManager : NetworkBehaviour
 
     private void OnClientConnectedCallback(ulong clientId)
     {
-        Debug.Log("Client Disconnect");
+        //Debug.Log("Client Disconnect");
         if (IsServer)
         {
             if (!clientsInLobby.ContainsKey(clientId))
@@ -250,6 +250,7 @@ public class LobbyManager : NetworkBehaviour
         AudioManager.am.PlayClick1();
         if (IsServer)
         {
+            NetworkManager.Singleton.OnClientConnectedCallback -= OnClientConnectedCallback;
             ExitGameClientRpc();
         }
         NetworkManager.Singleton.Shutdown();

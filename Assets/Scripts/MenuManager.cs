@@ -121,6 +121,9 @@ public class MenuManager : MonoBehaviour
 
     public async void StartLocalGame(string name)
     {
+        HostMenu.transform.GetChild(2).GetComponent<Button>().onClick.RemoveAllListeners();
+        HostMenu.transform.GetChild(3).GetComponent<Button>().onClick.RemoveAllListeners();
+
         await UnityServices.InitializeAsync();
 
         if (!AuthenticationService.Instance.IsAuthorized)
@@ -152,6 +155,7 @@ public class MenuManager : MonoBehaviour
 
             if (NetworkManager.Singleton.StartHost())
             {
+                Debug.Log("Starting Host");
                 Data.AddPlayerName(NetworkManager.Singleton.LocalClientId, name);
                 SceneTransitionHandler.sceneTransitionHandler.RegisterCallbacks();
                 SceneTransitionHandler.sceneTransitionHandler.SwitchScene("Lobby");
@@ -169,6 +173,9 @@ public class MenuManager : MonoBehaviour
 
     public async void JoinLocalGame(string name, string joinCode)
     {
+        JoinMenu.transform.GetChild(3).GetComponent<Button>().onClick.RemoveAllListeners();
+        JoinMenu.transform.GetChild(4).GetComponent<Button>().onClick.RemoveAllListeners();
+
         await UnityServices.InitializeAsync();
 
         if (!AuthenticationService.Instance.IsAuthorized)
