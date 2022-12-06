@@ -52,13 +52,21 @@ public class Player : NetworkBehaviour
         {
             Debug.Log("Host detects other client disconnect");
             GameManager.Singleton?.QuitAlertClientRpc();
+
+            
         }
+
         if (!IsHost)
         {
-            Debug.Log("Client detects Host disconnect");
-            GameManager.Singleton.QuitAlert.SetActive(true);
-            GameManager.Singleton.opponentQuit = true;
+            Debug.Log("Client Detects Disconnect");
+            GameObject lm = GameObject.Find("LobbyControl");
+            if (lm)
+            {
+                Debug.Log("Found Lobby");
+                lm.GetComponent<LobbyManager>().ExitGameClientRpc();
+            }
         }
+        
 
         if (GameManager.Singleton)
         {
@@ -66,8 +74,17 @@ public class Player : NetworkBehaviour
             GameManager.Singleton.hasGameStarted.OnValueChanged -= OnGameStartedChanged;
             GameManager.Singleton.playerTurn.OnValueChanged -= OnPlayerTurnChanged;
             GameManager.Singleton.score1.OnValueChanged -= OnScore1Changed;
-            GameManager.Singleton.score2.OnValueChanged -= OnScore2Changed;  
+            GameManager.Singleton.score2.OnValueChanged -= OnScore2Changed;
+
+            if (!IsHost)
+            {
+                Debug.Log("Client detects Host disconnect");
+                GameManager.Singleton.QuitAlert.SetActive(true);
+                GameManager.Singleton.opponentQuit = true;
+            }
         }
+
+        
     }
 
     public override void OnNetworkSpawn()

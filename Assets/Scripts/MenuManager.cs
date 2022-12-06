@@ -110,34 +110,17 @@ public class MenuManager : MonoBehaviour
     {
         await UnityServices.InitializeAsync();
 
-        AuthenticationService.Instance.SignedIn += () =>
+        if (!AuthenticationService.Instance.IsAuthorized)
         {
-            Debug.Log($"Signed in as {AuthenticationService.Instance.PlayerId}");
-        };
+            AuthenticationService.Instance.SignedIn += () =>
+            {
+                Debug.Log($"Signed in as {AuthenticationService.Instance.PlayerId}");
+            };
 
-        await AuthenticationService.Instance.SignInAnonymouslyAsync();
-
+            await AuthenticationService.Instance.SignInAnonymouslyAsync();
+        }
+        
         CreateRelay(name);
-
-        //ipAddress = GetLocalIPv4();
-        //Data.ipAddress = ipAddress;
-        //Debug.Log(ipAddress);
-        //NetworkManager.Singleton.GetComponent<UnityTransport>().SetConnectionData(
-        //    ipAddress,  // The IP address is a string
-        //    (ushort)3030, // The port number is an unsigned short
-        //    ipAddress // The server listen address is a string.
-        //);
-        //if (NetworkManager.Singleton.StartHost())
-        //{
-        //    Data.AddPlayerName(NetworkManager.Singleton.LocalClientId, name);
-        //    //Data.AddPlayerName( = name;
-        //    SceneTransitionHandler.sceneTransitionHandler.RegisterCallbacks();
-        //    SceneTransitionHandler.sceneTransitionHandler.SwitchScene("Lobby");
-        //}
-        //else
-        //{
-        //    Debug.LogError("Failed to start host.");
-        //}
     }
 
     public async void CreateRelay(string name)
@@ -175,34 +158,24 @@ public class MenuManager : MonoBehaviour
     {
         await UnityServices.InitializeAsync();
 
-        AuthenticationService.Instance.SignedIn += () =>
+        if (!AuthenticationService.Instance.IsAuthorized)
         {
-            Debug.Log($"Signed in as {AuthenticationService.Instance.PlayerId}");
-        };
+            AuthenticationService.Instance.SignedIn += () =>
+            {
+                Debug.Log($"Signed in as {AuthenticationService.Instance.PlayerId}");
+            };
+
+            await AuthenticationService.Instance.SignInAnonymouslyAsync();
+        }
+
+        Data.joinCode = joinCode;
 
         JoinRelay(joinCode, name);
-        //Data.ipAddress = ipAddress;
-        //NetworkManager.Singleton.GetComponent<UnityTransport>().SetConnectionData(
-        //    ipAddress,  // The IP address is a string
-        //    (ushort)3030, // The port number is an unsigned short
-        //    ipAddress // The server listen address is a string.
-        //);
-        //if (NetworkManager.Singleton.StartClient())
-        //{
-        //    //Debug.Log("LocalClientId:" + NetworkManager.Singleton.LocalClientId);
-        //    //Data.AddPlayerName(NetworkManager.Singleton.LocalClientId, name);
-        //    Data.localName = name;
-        //}
-        //else
-        //{
-        //    Debug.LogError("Failed to start client.");
-        //}
+        
     }
 
     private async void JoinRelay(string joinCode, string name)
     {
-        await AuthenticationService.Instance.SignInAnonymouslyAsync();
-
         try
         {
             JoinAllocation joinAllocation = await RelayService.Instance.JoinAllocationAsync(joinCode);

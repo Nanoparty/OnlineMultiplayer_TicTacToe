@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using TMPro;
 using Unity.Netcode;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class LobbyManager : NetworkBehaviour
 {
@@ -37,6 +38,7 @@ public class LobbyManager : NetworkBehaviour
         {
             allPlayersInLobby = false;
             NetworkManager.OnClientConnectedCallback += OnClientConnectedCallback;
+            NetworkManager.OnClientDisconnectCallback += OnClientDisconnectCallback;
             SceneTransitionHandler.sceneTransitionHandler.OnClientLoadedScene += ClientLoadedScene;            
         }
         else
@@ -51,6 +53,16 @@ public class LobbyManager : NetworkBehaviour
         SceneTransitionHandler.sceneTransitionHandler.SetSceneState(SceneTransitionHandler.SceneStates.Lobby);
     }
 
+    public override void OnNetworkDespawn()
+    {
+        base.OnNetworkDespawn();
+
+        if (IsServer)
+        {
+            ExitGameClientRpc();
+        }
+    }
+
     private void OnGUI()
     {
         if (lobbyText != null) lobbyText.SetText(UserLobbyStatusText);
@@ -58,6 +70,7 @@ public class LobbyManager : NetworkBehaviour
 
     private void GenerateUserStatsForLobby()
     {
+        Debug.Log("Updating Display Text");
         UserLobbyStatusText = string.Empty;
         foreach (var clientLobbyStatus in clientsInLobby)
         {
@@ -108,6 +121,7 @@ public class LobbyManager : NetworkBehaviour
 
     private void OnClientConnectedCallback(ulong clientId)
     {
+        Debug.Log("Client Disconnect");
         if (IsServer)
         {
             if (!clientsInLobby.ContainsKey(clientId))
@@ -115,6 +129,23 @@ public class LobbyManager : NetworkBehaviour
                 clientsInLobby.Add(clientId, false);
             }
             UpdateAndCheckPlayersInLobby();
+        }
+    }
+
+    private void OnClientDisconnectCallback(ulong clientId)
+    {
+        if (IsServer)
+        {
+            if (clientsInLobby.ContainsKey(clientId))
+            {
+                clientsInLobby.Remove(clientId);
+            }
+            UpdateAndCheckPlayersInLobby();
+            GenerateUserStatsForLobby();
+        }
+        else
+        {
+            ExitGame();
         }
     }
 
@@ -215,7 +246,26 @@ public class LobbyManager : NetworkBehaviour
 
     public void ExitGame()
     {
+        if (IsServer)
+        {
+            ExitGameClientRpc();
+        }
         NetworkManager.Singleton.Shutdown();
         SceneTransitionHandler.sceneTransitionHandler.ExitAndLoadStartMenu();
+    }
+
+    [ClientRpc]
+    public void ExitGameClientRpc()
+    {
+        Debug.Log("Client Exit");
+        if (IsServer) return;
+
+        NetworkManager.Singleton.Shutdown();
+        SceneManager.LoadScene("Menu", LoadSceneMode.Single);
+    }
+
+    public void CopyJoinCodeToClipboard()
+    {
+        UnityEditor.EditorGUIUtility.systemCopyBuffer = Data.joinCode;
     }
 }
